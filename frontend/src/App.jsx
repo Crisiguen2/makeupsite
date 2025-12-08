@@ -28,6 +28,9 @@ const FEATURED_LOOKS = [
   },
 ];
 
+// TODO: replace with your real Formspree endpoint, e.g. "https://formspree.io/f/abcd1234"
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORMSPREE_ID";
+
 function App() {
   const [form, setForm] = useState({
     name: "",
@@ -64,15 +67,23 @@ function App() {
     e.preventDefault();
     setStatus("loading");
 
-    try {
-      const res = await fetch("http://127.0.0.1:5000/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
+    const message = `Service: ${form.service}\nEvent date: ${form.date || "(not provided)"}\n\nDetails:\n${form.details}`;
 
-      if (data.success) {
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message,
+        }),
+      });
+
+      if (res.ok) {
         setStatus("success");
         setForm({ name: "", email: "", date: "", service: "Bridal", details: "" });
       } else {
@@ -85,10 +96,14 @@ function App() {
   };
 
   return (
-    <div className="page">
-      <header className="hero">
-        <nav className="nav">
-          <div className="logo">Em's World</div>
+    <>
+      <div id="top" />
+      <div className="page">
+        <header className="hero">
+          <nav className="nav">
+            <a href="#top" className="logo">
+              Em's World
+            </a>
           <div className="nav-links">
             <a href="#portfolio">Portfolio</a>
             <a href="#services">Services</a>
@@ -166,6 +181,12 @@ function App() {
             <h2>Signature Looks</h2>
             <p>A curated selection of recent bridal, glam, and editorial work.</p>
           </div>
+          <div className="portfolio-tags">
+            <span className="portfolio-tag">Bridal</span>
+            <span className="portfolio-tag">Soft Glam</span>
+            <span className="portfolio-tag">Editorial</span>
+            <span className="portfolio-tag">Natural</span>
+          </div>
           <div className="portfolio-grid">
             <article className="portfolio-card">
               <img
@@ -173,6 +194,7 @@ function App() {
                 alt="Bridal makeup look"
               />
               <div className="portfolio-card-body">
+                <span className="portfolio-label">Bridal</span>
                 <h3>Soft Bridal Glow</h3>
                 <p>Radiant skin, soft pink tones, and weightless lashes for a timeless bridal look.</p>
               </div>
@@ -183,6 +205,7 @@ function App() {
                 alt="Glam evening makeup look"
               />
               <div className="portfolio-card-body">
+                <span className="portfolio-label">Evening Glam</span>
                 <h3>Evening Glam</h3>
                 <p>Smokey rose eyes, defined liner, and a satin nude lip for evening events.</p>
               </div>
@@ -193,6 +216,7 @@ function App() {
                 alt="Editorial makeup look"
               />
               <div className="portfolio-card-body">
+                <span className="portfolio-label">Editorial</span>
                 <h3>Editorial Rose</h3>
                 <p>Monochromatic pinks with a modern, editorial finish for photoshoots.</p>
               </div>
@@ -203,6 +227,7 @@ function App() {
                 alt="Natural makeup look"
               />
               <div className="portfolio-card-body">
+                <span className="portfolio-label">Natural Glam</span>
                 <h3>Soft Natural Glam</h3>
                 <p>Fresh, skin-focused makeup that enhances your natural features.</p>
               </div>
@@ -261,6 +286,31 @@ function App() {
             <h2>Book Your Appointment</h2>
             <p>Share a few details about your event and I&apos;ll be in touch within 24 hours.</p>
           </div>
+
+          <div className="booking-steps">
+            <div className="booking-step">
+              <span className="booking-step-number">1</span>
+              <div className="booking-step-body">
+                <h3>Send your event details</h3>
+                <p>Share your date, location, and desired look so I can check availability.</p>
+              </div>
+            </div>
+            <div className="booking-step">
+              <span className="booking-step-number">2</span>
+              <div className="booking-step-body">
+                <h3>Review your quote</h3>
+                <p>You&apos;ll receive pricing, timing and any travel details tailored to your event.</p>
+              </div>
+            </div>
+            <div className="booking-step">
+              <span className="booking-step-number">3</span>
+              <div className="booking-step-body">
+                <h3>Get glam on the day</h3>
+                <p>I arrive on time with a full kit so you can relax and enjoy your moment.</p>
+              </div>
+            </div>
+          </div>
+
           <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-field">
@@ -335,6 +385,20 @@ function App() {
               <p className="form-status error">Something went wrong. Please try again.</p>
             )}
           </form>
+
+          <div className="contact-extra">
+            <p>
+              Prefer email? Reach me directly at
+              <a className="contact-email" href="mailto:youremail@example.com">
+                youremail@example.com
+              </a>
+              .
+            </p>
+            <p className="contact-note">
+              Please include your event date, location, number of people and any inspiration photos if
+              you have them.
+            </p>
+          </div>
         </section>
       </main>
 
@@ -342,7 +406,8 @@ function App() {
         <span>© {new Date().getFullYear()} Em's World</span>
         <span className="footer-secondary">Bridal • Glam • Editorial</span>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
 
